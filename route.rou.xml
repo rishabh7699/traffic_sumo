@@ -22,26 +22,24 @@
 <route id="r43" edges="e40 e03"/>
 <route id="r44" edges="e40 e04"/>
 
+<flow id="type1" begin="0" end="7200" probability="0.025" route="r11" type="car"/>
+<flow id="type2" begin="0" end="7200" probability="0.025" route="r12" type="car"/>
+<flow id="type3" begin="0" end="7200" probability="0.025" route="r13" type="car"/>
+<flow id="type4" begin="0" end="7200" probability="0.025" route="r14" type="car"/>
 
-<!-- <vehicle depart="5" id="v1" route="r13" type="car"/> -->
-<flow id="type1" begin="0" end="7200" probability="0.1" route="r11" type="car"/>
-<flow id="type2" begin="0" end="7200" probability="0.1" route="r12" type="car"/>
-<flow id="type3" begin="0" end="7200" probability="0.1" route="r13" type="car"/>
-<flow id="type4" begin="0" end="7200" probability="0.1" route="r14" type="car"/>
+<flow id="type5" begin="0" end="7200" probability="0.125" route="r21" type="car"/>
+<flow id="type6" begin="0" end="7200" probability="0.125" route="r22" type="car"/>
+<flow id="type7" begin="0" end="7200" probability="0.125" route="r23" type="car"/>
+<flow id="type8" begin="0" end="7200" probability="0.125" route="r24" type="car"/>
 
-<flow id="type5" begin="0" end="7200" probability="0.1" route="r21" type="car"/>
-<flow id="type6" begin="0" end="7200" probability="0.1" route="r22" type="car"/>
-<flow id="type7" begin="0" end="7200" probability="0.1" route="r23" type="car"/>
-<flow id="type8" begin="0" end="7200" probability="0.1" route="r24" type="car"/>
+<flow id="type9" begin="0" end="7200" probability="0.025" route="r31" type="car"/>
+<flow id="type10" begin="0" end="7200" probability="0.025" route="r32" type="car"/>
+<flow id="type11" begin="0" end="7200" probability="0.025" route="r33" type="car"/>
+<flow id="type12" begin="0" end="7200" probability="0.025" route="r34" type="car"/>
 
-<flow id="type9" begin="0" end="7200" probability="0.1" route="r31" type="car"/>
-<flow id="type10" begin="0" end="7200" probability="0.1" route="r32" type="car"/>
-<flow id="type11" begin="0" end="7200" probability="0.1" route="r33" type="car"/>
-<flow id="type12" begin="0" end="7200" probability="0.1" route="r34" type="car"/>
-
-<flow id="type13" begin="0" end="7200" probability="0.1" route="r41" type="car"/>
-<flow id="type14" begin="0" end="7200" probability="0.1" route="r42" type="car"/>
-<flow id="type15" begin="0" end="7200" probability="0.1" route="r43" type="car"/>
-<flow id="type16" begin="0" end="7200" probability="0.1" route="r44" type="car"/>
+<flow id="type13" begin="0" end="7200" probability="0.025" route="r41" type="car"/>
+<flow id="type14" begin="0" end="7200" probability="0.025" route="r42" type="car"/>
+<flow id="type15" begin="0" end="7200" probability="0.025" route="r43" type="car"/>
+<flow id="type16" begin="0" end="7200" probability="0.025" route="r44" type="car"/>
 
 </routes>
