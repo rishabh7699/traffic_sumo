@@ -3,6 +3,7 @@
 import os
 import sys
 import set_route
+import predictor
 
 tools = os.path.join('/usr/share/sumo', 'tools')
 sys.path.append(tools)
@@ -10,49 +11,38 @@ sys.path.append(tools)
 from sumolib import checkBinary  # Checks for the binary in environ vars
 import traci
 
-
 # contains TraCI control loop
-def run():
+def run(p):
     step = 0
     waiting_time = 0
-    while traci.simulation.getMinExpectedNumber() > 0 and step < 7000:
-        if step%100 == 0:
-            traci.trafficlight.setRedYellowGreenState("n0","ggggggrrrrrrrrrrrrrrrrrr")
-        elif step%100 == 25:
-            traci.trafficlight.setRedYellowGreenState("n0","rrrrrrggggggrrrrrrrrrrrr")
-        elif step%100 == 50:
-            traci.trafficlight.setRedYellowGreenState("n0","rrrrrrrrrrrrggggggrrrrrr")
-        elif step%100 == 75:
-            traci.trafficlight.setRedYellowGreenState("n0","rrrrrrrrrrrrrrrrrrgggggg")
-        elif step%100 == 96:
-            traci.trafficlight.setRedYellowGreenState("n0","rrrrrrrrrrrrrrrrrryyyyyy")
-        elif step%100 == 21:
-            traci.trafficlight.setRedYellowGreenState("n0","yyyyyyrrrrrrrrrrrrrrrrrr")
-        elif step%100 == 46:
-            traci.trafficlight.setRedYellowGreenState("n0","rrrrrryyyyyyrrrrrrrrrrrr")
-        elif step%100 == 71:
-            traci.trafficlight.setRedYellowGreenState("n0","rrrrrrrrrrrryyyyyyrrrrrr")
+    t = [0, 25, 50, 75]
+    G = ["ggggggrrrrrrrrrrrrrrrrrr", "rrrrrrggggggrrrrrrrrrrrr", "rrrrrrrrrrrrggggggrrrrrr", "rrrrrrrrrrrrrrrrrrgggggg"]
+    Y = ["rrrrrrrrrrrrrrrrrryyyyyy", "yyyyyyrrrrrrrrrrrrrrrrrr", "rrrrrryyyyyyrrrrrrrrrrrr", "rrrrrrrrrrrryyyyyyrrrrrr"]
+    while traci.simulation.getMinExpectedNumber() > 0 and step < 3600:
+        for i in range(4):
+            if step == t[i]:
+                traci.trafficlight.setRedYellowGreenState("n0",G[i])    
+                t[i] = predictor.predict(p,t)
+            elif step == t[i]-4:
+                traci.trafficlight.setRedYellowGreenState("n0",Y[i])
         step += 1
-        waiting_time += traci.edge.getWaitingTime("e10") 
-        waiting_time += traci.edge.getWaitingTime("e20") 
-        waiting_time += traci.edge.getWaitingTime("e30") 
-        waiting_time += traci.edge.getWaitingTime("e40") 
-    
+        for i in ["e10", "e20", "e30", "e40"]:
+            waiting_time += traci.edge.getWaitingTime(i) 
         traci.simulationStep()
-    print(waiting_time)
     traci.close()
     sys.stdout.flush()
     return waiting_time
 
 
 # main entry point
-def main():
-    set_route.set(0.1,0.5,0.1,0.1)
+def main(p):
+    set_route.set(p[0],p[1],p[2],p[3])
     sumoBinary = checkBinary('sumo-gui')
-    sumoBinary = checkBinary('sumo')
+    # sumoBinary = checkBinary('sumo')
     # traci starts sumo as a subprocess and then this script connects and runs
     traci.start([sumoBinary, "-c", "sumo.sumocfg"])
-    waiting_time = run()
+    waiting_time = run(p)
     print(waiting_time)
+    return waiting_time
 
-main()
+main([0.2,0.2,0.2,0.2])
