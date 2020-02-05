@@ -1,0 +1,15 @@
+<edges>
+
+    <edge from="n0" to="n1" id="e01" type="A"/>
+    <edge from="n1" to="n0" id="e10" type="A"/>
+
+    <edge from="n0" to="n2" id="e02" type="A"/>
+    <edge from="n2" to="n0" id="e20" type="A"/>
+
+    <edge from="n0" to="n3" id="e03" type="A"/>
+    <edge from="n3" to="n0" id="e30" type="A"/>
+
+    <edge from="n0" to="n4" id="e04" type="A"/>
+    <edge from="n4" to="n0" id="e40" type="A"/>
+
+</edges>

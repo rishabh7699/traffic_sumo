@@ -1,11 +1,12 @@
 from numpy import array, random, reshape
 from neuralNetwork import NeuralNetwork
 from simulation import simulation
+import pickle as pkl
 
 class IndividualLight:
     dimensions = (9, 5, 5, 1)  # 5 inputs
 
-    def __init__(self, weights=None, mutate_prob=0.08):
+    def __init__(self, weights, mutate_prob):
         if weights is None:
             self.nn = NeuralNetwork(IndividualLight.dimensions)
         else:
@@ -17,17 +18,12 @@ class IndividualLight:
         self.timeAlloted = self.nn.feed_forward(X)
         return self.timeAlloted
 
-    def RunSimulation(self, simulation_no, file):  # run at the end of simulation compare with queues
-        ## run simulation here 
-        ## in loop for each road  
-            # ## get input state
-            # time_green = self.timeAlloted(input_state) ## does the feed forward work
-            # ## perform rest of sim and get total waiting time
-        p = [0.08,0.2,0.2,0.6]
-        file.write(str(simulation_no)+") ")
-        self.fitness = -1*simulation(p, self.nn, file)
-        file.write(str(self.fitness)+"\n\n")
-        file.flush()
+    def RunSimulation(self, simulation_no):  # run at the end of simulation compare with queues
+        with open("./results/res.txt", "a") as file:
+            file.write(str(simulation_no)+") ")
+        self.fitness = simulation(self.nn)
+        with open("./results/res.txt", "a") as file:
+            file.write(str(self.fitness)+"\n\n")
 
     def findFitness(self):
         return self.fitness
@@ -43,24 +39,27 @@ class Population:
         self.fitness_history = []               # stores fitness history of generation as list
         self.generation = 1                     # current generation
 
-        self.individuals = [IndividualLight() for i in range(self.pop_size)]   # initializes individuals of population
+        self.individuals = [IndividualLight(None, mutate_prob) for i in range(self.pop_size)]   # initializes individuals of population
         self.population_fitness = -1e18
         self.bestModel = None
 
-    def runSimulation(self, file):
+    def runSimulation(self):
         simulation_no = 0
         for individual in self.individuals:
-                individual.RunSimulation(simulation_no, file)
+                individual.RunSimulation(simulation_no)
                 simulation_no += 1
 
     # population fitness
     def grade(self):
+        old_fitness = self.population_fitness
         for i in self.individuals:
             self.population_fitness = max([i.findFitness(), self.population_fitness])
             if self.population_fitness == i.findFitness():
                 self.bestModel = i.nn.weights
-
-        
+        if self.population_fitness > old_fitness:
+            with open('./results/best_model.pkl', 'ab') as f:
+                pkl.dump(self.bestModel, f)
+                pkl.dump([self.population_fitness], f)
         self.fitness_history.append(self.population_fitness)
     
     def select_parents(self):
@@ -101,7 +100,7 @@ class Population:
                 if father != mother:
                     child_weights = self.crossover(father.nn.weights, mother.nn.weights)
                     # mutation
-                    child = IndividualLight(weights=child_weights)
+                    child = IndividualLight(weights=child_weights, mutate_prob=self.mutate_prob)
                     children.append(child)
             self.individuals = self.parents + children
 

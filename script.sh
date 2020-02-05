@@ -1,2 +1,3 @@
-netconvert --node-files node.nod.xml --edge-files edge.edg.xml --type-files type.type.xml --connection-files=connection.con.xml -o net.net.xml
-python3 LightBrain.py
+netconvert --node-files ./sumo/node.nod.xml --edge-files ./sumo/edge.edg.xml --type-files ./sumo/type.type.xml --connection-files ./sumo/connection.con.xml -o ./sumo/network.net.xml
+# python3 ./source/runner.py
+python3 ./source/Train.py
