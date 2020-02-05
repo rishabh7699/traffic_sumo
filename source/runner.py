@@ -4,7 +4,14 @@ import numpy as np
 import pickle as pkl
 
 with open('./results/best_model.pkl', 'rb') as f:
-    weights = pkl.load(f)
+    
+    models = []
+    while True:
+        try:
+            weights = pkl.loads(f)
+            models.append(weights)
+        except EOFError:
+            break
     dimensions = (9, 5, 5, 1)
-    nn = NeuralNetwork(dimensions, weights, 0)
+    nn = NeuralNetwork(dimensions, models[-1], 0)
     simulation(nn, 1)
