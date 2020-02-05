@@ -51,15 +51,13 @@ class Population:
 
     # population fitness
     def grade(self):
-        old_fitness = self.population_fitness
+        self.population_fitness = -1e18
         for i in self.individuals:
             self.population_fitness = max([i.findFitness(), self.population_fitness])
             if self.population_fitness == i.findFitness():
                 self.bestModel = i.nn.weights
-        if self.population_fitness > old_fitness:
-            with open('./results/best_model.pkl', 'ab') as f:
-                pkl.dump(self.bestModel, f)
-                pkl.dump([self.population_fitness], f)
+        with open('./results/best_model.pkl', 'ab') as f:
+            pkl.dump(self.bestModel, f)
         self.fitness_history.append(self.population_fitness)
     
     def select_parents(self):

@@ -8,10 +8,10 @@ with open('./results/best_model.pkl', 'rb') as f:
     models = []
     while True:
         try:
-            weights = pkl.loads(f)
+            weights = pkl.load(f)
             models.append(weights)
         except EOFError:
             break
     dimensions = (9, 5, 5, 1)
     nn = NeuralNetwork(dimensions, models[-1], 0)
-    simulation(nn, 1)
+    print("avg waiting time : ", simulation(nn, 1))
