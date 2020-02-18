@@ -1,8 +1,8 @@
 def set(p1,p2,p3,p4):
     f = open("./sumo/route.rou.xml","w")
     data = """<routes>
-<vType accel="1.0" decel="5.0" id="car" length="3.0" maxspeed="100.0" sigma="0.0"/>
-<vType accel="1.0" decel="5.0" id="bus" length="5.0" maxspeed="80.0" sigma="0.0"/>
+<vType accel="1.0" decel="20.0" id="car" length="3.0" maxspeed="100.0" sigma="0.0"/>
+<vType accel="1.0" decel="20.0" id="bus" length="5.0" maxspeed="80.0" sigma="0.0"/>
 
 <route id="r11" edges="e10 e01"/>
 <route id="r12" edges="e10 e02"/>

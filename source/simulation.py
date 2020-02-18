@@ -13,9 +13,12 @@ import traci
 
 # contains TraCI control loop
 def predict(p, queue, i, nn):
-    x = p+queue+[i]
-    tt = int(nn.feed_forward(x))
-    time = 10+tt
+    x = [0,0,0,0]
+    x[i] = 1
+    x = p+queue+x
+    tt = abs(nn.feed_forward(x))
+    tt = int(tt)
+    time = 6+tt
     return time
 
 def run(p, nn):
@@ -44,9 +47,9 @@ def run(p, nn):
             waiting_time += traci.edge.getLastStepHaltingNumber(i) 
         traci.simulationStep()
     with open("./results/res.txt", "a") as file:
-        file.write(str(T)+"\n")
+        file.write(str(T)+"\n\n")
     traci.close()
-    sys.stdout.flush()
+    # sys.stdout.flush()
     return waiting_time
 
 
@@ -68,7 +71,7 @@ def simulation(nn, mode = 0, traffic = 0.5):
     # traci starts sumo as a subprocess and then this script connects and runs
     traci.start([sumoBinary, "-c", "./sumo/sumo.sumocfg"])
     waiting_time = run(p, nn)
-    total_cars = 3600*sum(p)
+    total_cars = 3600*traffic
     avg_waiting_time = waiting_time/total_cars
     #print(waiting_time)
     return -avg_waiting_time

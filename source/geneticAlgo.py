@@ -4,14 +4,14 @@ from simulation import simulation
 import pickle as pkl
 
 class IndividualLight:
-    dimensions = (9, 5, 5, 1)  # 5 inputs
+    dimensions = (12, 15, 5, 1)  # 5 inputs
 
     def __init__(self, weights, mutate_prob):
         if weights is None:
             self.nn = NeuralNetwork(IndividualLight.dimensions)
         else:
             self.nn = NeuralNetwork(IndividualLight.dimensions, weights=weights, mutate_prob=mutate_prob)
-        
+        self.fitness = None
         self.timeAlloted = None
 
     def getTime(self, X):
@@ -20,10 +20,8 @@ class IndividualLight:
 
     def RunSimulation(self, simulation_no):  # run at the end of simulation compare with queues
         with open("./results/res.txt", "a") as file:
-            file.write(str(simulation_no)+") ")
-        self.fitness = simulation(self.nn)
-        with open("./results/res.txt", "a") as file:
-            file.write(str(self.fitness)+"\n\n")
+            file.write(simulation_no+") ")
+        return simulation(self.nn)
 
     def findFitness(self):
         return self.fitness
@@ -46,8 +44,13 @@ class Population:
     def runSimulation(self):
         simulation_no = 0
         for individual in self.individuals:
-                individual.RunSimulation(simulation_no)
-                simulation_no += 1
+            f = individual.RunSimulation(str(simulation_no))
+            if individual.fitness is None:
+                individual.fitness = f
+            individual.fitness = (individual.fitness+f)/2
+            with open("./results/res.txt", "a") as file:
+                file.write("fitness value : " + str(individual.fitness)+"\n\n\n")
+            simulation_no += 1
 
     # population fitness
     def grade(self):
@@ -64,7 +67,9 @@ class Population:
         retain_length = int(self.select_prob * self.pop_size)
         # sorts individual based on their filighttness
         self.individuals = sorted(self.individuals, key=lambda x: x.fitness, reverse=True) 
+        
         self.parents = self.individuals[:retain_length]
+        
         # selecting random unfittest parents
         unfittest = self.individuals[retain_length:]
         for individual in unfittest:
@@ -102,10 +107,24 @@ class Population:
                     children.append(child)
             self.individuals = self.parents + children
 
-    def evolve(self):
+    def non_breed(self):
+        target_children_size = self.pop_size - len(self.parents)
+        children = []
+        if len(self.parents) > 0:
+            while len(children) < target_children_size:
+                parent = random.choice(self.parents)
+                parent_weight = parent.nn.weights
+                child = IndividualLight(weights=parent_weight, mutate_prob=self.mutate_prob)
+                children.append(child)
+            self.individuals = self.parents + children
+            
+    def evolve(self, type=0):
 
         self.grade()
         self.select_parents()
-        self.breed()
+        if type:
+            self.non_breed()
+        else:
+            self.breed()
         self.parents = []
         self.generation += 1
