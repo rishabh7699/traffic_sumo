@@ -8,14 +8,15 @@ from numpy import random
 
 sys.path.append('/usr/share/sumo/tools')
 
-from sumolib import checkBinary  # Checks for the binary in environ vars
+from sumolib import checkBinary
 import traci
 
-# contains TraCI control loop
 def predict(p, queue, i, nn):
+    # return 30
     x = [0,0,0,0]
     x[i] = 1
-    x = p+queue+x
+    # x = p+queue+x
+    x = queue + x
     tt = abs(nn.feed_forward(x))
     tt = int(tt)
     time = 6+tt
@@ -46,33 +47,26 @@ def run(p, nn):
         for i in ["e10", "e20", "e30", "e40"]:
             waiting_time += traci.edge.getLastStepHaltingNumber(i) 
         traci.simulationStep()
-    with open("./results/res.txt", "a") as file:
-        file.write(str(T)+"\n\n")
     traci.close()
-    # sys.stdout.flush()
-    return waiting_time
+    return waiting_time, T
 
 
 # main entry point
-def simulation(nn, mode = 0, traffic = 0.5):
+def simulation(nn, mode = 0, traffic = 1.0):
 
     p = [random.rand(), random.rand(), random.rand(), random.rand()]
     s = sum(p)
     s = traffic/s
     for i in range(4):
         p[i] = p[i]*s
-    with open("./results/res.txt", "a") as file:
-        file.write(str(p)+"\n")
-    set_route.set(p[0],p[1],p[2],p[3])
+    set_route.set(p)
     if mode:
         sumoBinary = checkBinary('sumo-gui')
     else:
         sumoBinary = checkBinary('sumo')
-    # traci starts sumo as a subprocess and then this script connects and runs
     traci.start([sumoBinary, "-c", "./sumo/sumo.sumocfg"])
-    waiting_time = run(p, nn)
+    waiting_time, T = run(p, nn)
     total_cars = 3600*traffic
     avg_waiting_time = waiting_time/total_cars
-    #print(waiting_time)
-    return -avg_waiting_time
+    return -avg_waiting_time, p, T
 

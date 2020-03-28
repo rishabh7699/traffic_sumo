@@ -4,7 +4,7 @@ class NeuralNetwork:
     def __init__(self, dimensions, weights=None, mutate_prob=0.08):
         
         self.total_layers = len(dimensions)     
-        if weights is None or random.rand()<0.05:
+        if weights is None:
             self.weights = []
             for i in range(self.total_layers - 1):
                 w = 2*random.rand(dimensions[i]+1, dimensions[i+1]) - 1

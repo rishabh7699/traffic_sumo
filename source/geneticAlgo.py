@@ -4,13 +4,12 @@ from simulation import simulation
 import pickle as pkl
 
 class IndividualLight:
-    dimensions = (12, 15, 5, 1)  # 5 inputs
 
-    def __init__(self, weights, mutate_prob):
+    def __init__(self, weights, mutate_prob, dimensions):
         if weights is None:
-            self.nn = NeuralNetwork(IndividualLight.dimensions)
+            self.nn = NeuralNetwork(dimensions)
         else:
-            self.nn = NeuralNetwork(IndividualLight.dimensions, weights=weights, mutate_prob=mutate_prob)
+            self.nn = NeuralNetwork(dimensions, weights=weights, mutate_prob=mutate_prob)
         self.fitness = None
         self.timeAlloted = None
 
@@ -18,17 +17,12 @@ class IndividualLight:
         self.timeAlloted = self.nn.feed_forward(X)
         return self.timeAlloted
 
-    def RunSimulation(self, simulation_no):  # run at the end of simulation compare with queues
-        with open("./results/res.txt", "a") as file:
-            file.write(simulation_no+") ")
-        return simulation(self.nn)
-
     def findFitness(self):
         return self.fitness
 
 class Population:
 
-    def __init__(self, pop_size=10, mutate_prob=0.08, retain_prob=0.01, select=0.333):
+    def __init__(self, pop_size=10, mutate_prob=0.08, retain_prob=0.01, select=0.333, dimensions = (12, 15, 5, 1), training_no = 4, traffic = 1):
         self.pop_size = pop_size                # population size of generation
         self.mutate_prob = mutate_prob          # probability of mutation of genes
         self.retain_prob = retain_prob          # probability of selecting unfittest parents
@@ -36,21 +30,33 @@ class Population:
 
         self.fitness_history = []               # stores fitness history of generation as list
         self.generation = 1                     # current generation
-
-        self.individuals = [IndividualLight(None, mutate_prob) for i in range(self.pop_size)]   # initializes individuals of population
+        self.training_no = training_no
+        self.dimensions = dimensions #(12, 15, 5, 1)  # 5 inputs
+        self.individuals = [IndividualLight(None, mutate_prob, dimensions) for i in range(self.pop_size)]   # initializes individuals of population
         self.population_fitness = -1e18
+        self.average_fittness = 0
+        self.traffic = traffic
         self.bestModel = None
 
     def runSimulation(self):
         simulation_no = 0
+        self.average_fittness = 0
         for individual in self.individuals:
-            f = individual.RunSimulation(str(simulation_no))
-            if individual.fitness is None:
-                individual.fitness = f
-            individual.fitness = (individual.fitness+f)/2
-            with open("./results/res.txt", "a") as file:
-                file.write("fitness value : " + str(individual.fitness)+"\n\n\n")
+            individual.fitness = 0
+            for ch in ['A', 'B', 'C']:
+                f, p, T = simulation(individual.nn, 0, self.traffic)
+                self.average_fittness += f
+                if individual.fitness is None:
+                    individual.fitness = f
+                individual.fitness += f
+                with open("./results/training"+str(self.training_no)+"/res.txt", "a") as file:
+                    file.write(str(simulation_no) +ch+ ") " + str(p) + "\n" + str(T) + "\n\n")
+                    file.write("fitness value : " + str(f)+"\n\n")
+            individual.fitness /= 3
             simulation_no += 1
+        self.average_fittness /= 3*self.pop_size
+        with open("./results/training"+str(self.training_no)+"/graph.txt", "a") as file:
+            file.write(str(self.average_fittness) + " ")
 
     # population fitness
     def grade(self):
@@ -59,8 +65,10 @@ class Population:
             self.population_fitness = max([i.findFitness(), self.population_fitness])
             if self.population_fitness == i.findFitness():
                 self.bestModel = i.nn.weights
-        with open('./results/best_model.pkl', 'ab') as f:
+        with open("./results/training"+str(self.training_no)+"/best_model.pkl", 'ab') as f:
             pkl.dump(self.bestModel, f)
+        with open("./results/training"+str(self.training_no)+"/graph.txt", "a") as file:
+            file.write(str(self.population_fitness) + "\n")
         self.fitness_history.append(self.population_fitness)
     
     def select_parents(self):
@@ -103,7 +111,7 @@ class Population:
                 if father != mother:
                     child_weights = self.crossover(father.nn.weights, mother.nn.weights)
                     # mutation
-                    child = IndividualLight(weights=child_weights, mutate_prob=self.mutate_prob)
+                    child = IndividualLight(weights=child_weights, mutate_prob=self.mutate_prob, dimensions = self.dimensions)
                     children.append(child)
             self.individuals = self.parents + children
 
@@ -114,7 +122,7 @@ class Population:
             while len(children) < target_children_size:
                 parent = random.choice(self.parents)
                 parent_weight = parent.nn.weights
-                child = IndividualLight(weights=parent_weight, mutate_prob=self.mutate_prob)
+                child = IndividualLight(weights=parent_weight, mutate_prob=self.mutate_prob ,dimensions = self.dimensions)
                 children.append(child)
             self.individuals = self.parents + children
             
